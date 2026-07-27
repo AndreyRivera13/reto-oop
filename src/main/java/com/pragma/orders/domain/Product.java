@@ -16,8 +16,8 @@ public class Product {
     }
     public Product(Long id, String name, double price) {
         this.id = id;
-        this.name = name;
-        this.price = price;
+        setName(name);
+        setPrice(price);
     }
     public Long getId() {
         return id;
@@ -29,12 +29,18 @@ public class Product {
         return name;
     }
     public void setName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("El nombre del producto no puede estar vacio");
+        }
         this.name = name;
     }
     public double getPrice() {
         return price;
     }
     public void setPrice(double price) {
+        if (price <= 0) {
+            throw new IllegalArgumentException("El precio del producto debe ser mayor que cero");
+        }
         this.price = price;
     }
 }

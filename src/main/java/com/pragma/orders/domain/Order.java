@@ -32,10 +32,10 @@ public class Order {
     }
     public Order(Long id, String customer, List<Product> products, LocalDate date, OrderStatus status) {
         this.id = id;
-        this.customer = customer;
-        this.products = products;
-        this.date = date;
-        this.status = status;
+        setCustomer(customer);
+        setProducts(products);
+        setDate(date);
+        setStatus(status);
     }
     public Long getId() {
         return id;
@@ -47,24 +47,39 @@ public class Order {
         return customer;
     }
     public void setCustomer(String customer) {
+        if (customer == null || customer.isBlank()) {
+            throw new IllegalArgumentException("El cliente del pedido no puede estar vacio");
+        }
         this.customer = customer;
     }
     public List<Product> getProducts() {
         return products;
     }
     public void setProducts(List<Product> products) {
+        if (products == null || products.isEmpty()) {
+            throw new IllegalArgumentException("El pedido debe tener al menos un producto");
+        }
         this.products = products;
     }
     public LocalDate getDate() {
         return date;
     }
     public void setDate(LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("La fecha del pedido no puede ser nula");
+        }
+        if (date.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha del pedido no puede ser futura");
+        }
         this.date = date;
     }
     public OrderStatus getStatus() {
         return status;
     }
     public void setStatus(OrderStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("El estado del pedido no puede ser nulo");
+        }
         this.status = status;
     }
 }
