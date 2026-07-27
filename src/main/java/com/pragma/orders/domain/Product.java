@@ -4,6 +4,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Objects;
 @Entity
 @Table(name = "products")
 public class Product {
@@ -42,5 +43,22 @@ public class Product {
             throw new IllegalArgumentException("El precio del producto debe ser mayor que cero");
         }
         this.price = price;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Product)) {
+            return false;
+        }
+        Product other = (Product) o;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass());
     }
 }

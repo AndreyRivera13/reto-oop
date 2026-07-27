@@ -9,6 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import com.pragma.orders.domain.state.OrderState;
+import com.pragma.orders.domain.state.OrderStateFactory;
 import java.time.LocalDate;
 import java.util.List;
 @Entity
@@ -81,5 +83,60 @@ public class Order {
             throw new IllegalArgumentException("El estado del pedido no puede ser nulo");
         }
         this.status = status;
+    }
+
+    /**
+     * Cambia el estado del pedido validando que la transicion sea permitida
+     * segun el estado actual (patron State, resuelto via OrderStateFactory).
+     */
+    public void changeStatus(OrderStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("El nuevo estado del pedido no puede ser nulo");
+        }
+        OrderState currentState = OrderStateFactory.forStatus(this.status);
+        currentState.validateTransitionTo(newStatus);
+        this.status = newStatus;
+    }
+
+    /**
+     * Agrega un producto al pedido. Solo se permite mientras el pedido
+     * este en un estado que admita modificaciones (PENDING).
+     */
+    public void addProduct(Product product) {
+        ensureModifiable();
+        if (product == null) {
+            throw new IllegalArgumentException("El producto no puede ser nulo");
+        }
+        if (products.contains(product)) {
+            throw new IllegalArgumentException("El producto ya esta incluido en el pedido");
+        }
+        products.add(product);
+    }
+
+    /**
+     * Elimina un producto del pedido. Solo se permite mientras el pedido
+     * este en un estado que admita modificaciones (PENDING), y el pedido
+     * debe conservar al menos un producto.
+     */
+    public void removeProduct(Product product) {
+        ensureModifiable();
+        if (product == null) {
+            throw new IllegalArgumentException("El producto no puede ser nulo");
+        }
+        if (products.size() <= 1) {
+            throw new IllegalStateException("El pedido debe conservar al menos un producto");
+        }
+        boolean removed = products.remove(product);
+        if (!removed) {
+            throw new IllegalArgumentException("El producto no pertenece al pedido");
+        }
+    }
+
+    private void ensureModifiable() {
+        OrderState currentState = OrderStateFactory.forStatus(this.status);
+        if (!currentState.allowsModification()) {
+            throw new IllegalStateException(
+                "No se pueden modificar los productos de un pedido en estado " + this.status);
+        }
     }
 }
